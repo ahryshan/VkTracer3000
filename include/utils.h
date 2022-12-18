@@ -8,6 +8,8 @@
 #include <cmath>
 #include <random>
 
+#include "Ray.h"
+#include "Hittable.h"
 #include "constants.h"
 
 inline double radians(double degrees) {
@@ -36,7 +38,8 @@ inline double randomDouble11(double min, double max) {
   return dist(mt);
 }
 
-inline double clamp(double value, double min, double max) {
+template<typename T>
+inline T clamp(T value, T min, T max) {
   if(value < min) return min;
   if(value > max) return max;
   return value;

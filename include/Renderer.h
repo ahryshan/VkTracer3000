@@ -12,7 +12,7 @@
 
 class Renderer {
 public:
-  static void writeImage(const Camera& camera, const Hittable& hittable, int width, int height, int samplesPerPixel, const std::string& fileName);
+  static void writeImage(const Camera& camera, const Hittable& hittable, uint32_t width, uint32_t height, int samplesPerPixel, const std::string& fileName);
 };
 
 

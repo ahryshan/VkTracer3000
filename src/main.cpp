@@ -35,7 +35,7 @@ int main() {
 
 
   // Camera
-  Camera camera;
+  Camera camera(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 90, aspect_ratio);
 
   Renderer::writeImage(camera, world, image_width, image_height, samplesPerPixel, "image.ppm");
 

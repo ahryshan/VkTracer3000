@@ -4,7 +4,9 @@
 
 #include "Dielectric.h"
 
-Dielectric::Dielectric(float refractionCoefficient) : m_RefractionCoeff{refractionCoefficient} {}
+Dielectric::Dielectric(float refractionCoefficient) : m_RefractionCoeff{refractionCoefficient}, m_Albedo(1.f, 1.f, 1.f) {}
+
+Dielectric::Dielectric(float refractionCoefficient, Color albedo) : m_RefractionCoeff{refractionCoefficient}, m_Albedo{albedo} {}
 
 bool Dielectric::scatter(const Ray& rayInput, const HitRecord& hitRecord, Color& attenuation, Ray& scattered) const {
   attenuation = Color{1.f, 1.f, 1.f};
@@ -22,7 +24,8 @@ bool Dielectric::scatter(const Ray& rayInput, const HitRecord& hitRecord, Color&
   else
     direction = refract(unitDirection, hitRecord.normal, refractionRatio);
 
-  scattered = Ray(hitRecord.p, direction);
+  scattered   = Ray(hitRecord.p, direction);
+  attenuation = m_Albedo;
   return true;
 }
 

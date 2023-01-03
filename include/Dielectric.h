@@ -10,6 +10,7 @@
 class Dielectric : public Material {
 public:
   explicit Dielectric(float refractionCoefficient);
+  Dielectric(float refractionCoefficient, Color albedo);
   virtual bool scatter(const Ray& rayInput, const HitRecord& hitRecord, Color& attenuation, Ray& scattered) const override;
 
 private:
@@ -17,6 +18,7 @@ private:
 
 private:
   float m_RefractionCoeff;
+  Color m_Albedo;
 };
 
 

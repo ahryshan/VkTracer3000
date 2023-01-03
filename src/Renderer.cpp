@@ -97,7 +97,7 @@ Color rayColor(const Ray& r, const Hittable& world, int depth) {
   }
 
   if (world.hit(r, 0.001, c_INFINITY, rec)) {
-    point3 target = rec.p + rec.normal + random_in_unit_sphere();
+    point3 target = rec.p + rec.normal + random_in_hemisphere(rec.normal);
     return 0.5 * rayColor(Ray(rec.p, target - rec.p), world, depth - 1);
   }
   vec3      unit_direction = unit_vector(r.direction());

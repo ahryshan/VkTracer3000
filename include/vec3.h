@@ -111,11 +111,19 @@ inline vec3 unit_vector(vec3 v) {
 }
 
 inline vec3 random_in_unit_sphere() {
-  while(true) {
+  while (true) {
     auto p = vec3::random();
     if (p.length_squared() >= 1) continue;
     return p;
   }
+}
+
+inline vec3 random_in_hemisphere(const vec3& normal) {
+  vec3 inUnitSphere = random_in_unit_sphere();
+  if (dot(random_in_unit_sphere(), normal) > 0.0)
+    return inUnitSphere;
+  else
+    return -inUnitSphere;
 }
 
 #endif //VKTRACER3000_VEC3_H

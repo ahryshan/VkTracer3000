@@ -96,13 +96,13 @@ Color rayColor(const Ray& r, const Hittable& world, int depth) {
     return {0, 0, 0};
   }
 
-  if (world.hit(r, 0, c_INFINITY, rec)) {
+  if (world.hit(r, 0.001, c_INFINITY, rec)) {
     point3 target = rec.p + rec.normal + random_in_unit_sphere();
     return 0.5 * rayColor(Ray(rec.p, target - rec.p), world, depth - 1);
   }
   vec3      unit_direction = unit_vector(r.direction());
   auto      t              = 0.5 * (unit_direction.y() + 1.0);
-  return (1.0 - t) * Color(0.0, 0.0, 0.0) + t * Color(0.5, 0.7, 1.0);
+  return (1.0 - t) * Color(1.0, 1.0, 1.0) + t * Color(0.5, 0.7, 1.0);
 }
 
 void renderChunk(const Camera& camera, const Hittable& hittable, int samplesPerPixel, Chunk& chunk) {

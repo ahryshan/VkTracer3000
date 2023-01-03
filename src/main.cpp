@@ -9,9 +9,9 @@ int main() {
 
   // Image
   const double aspect_ratio    = 16.0 / 9.0;
-  const int    image_height    = 360;
+  const int    image_height    = 720;
   const int    image_width     = static_cast<int>(image_height * aspect_ratio);
-  const int    samplesPerPixel = 50;
+  const int    samplesPerPixel = 12;
 
   // World
   HittableList world;

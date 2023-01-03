@@ -3,6 +3,7 @@
 //
 
 #include "Camera.h"
+
 Camera::Camera(): Camera(2.0, 16.0 / 9.0, 1.0) {}
 
 Camera::Camera(double viewportHeight, double aspectRatio, double focalLength) {

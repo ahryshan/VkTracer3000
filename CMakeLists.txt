@@ -7,5 +7,3 @@ file(GLOB_RECURSE _SRCS src/*.cpp include/*.h)
 include_directories(include)
 
 add_executable(VkTracer3000 ${_SRCS})
-
-target_precompile_headers(VkTracer3000 PUBLIC include/vkt3000_pch.h)

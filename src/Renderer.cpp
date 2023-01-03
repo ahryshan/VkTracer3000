@@ -2,7 +2,6 @@
 // Created by alex on 12/15/22.
 //
 
-#include "vkt3000_pch.h"
 #include "Renderer.h"
 
 #include <memory>
@@ -13,7 +12,6 @@
 #include <functional>
 
 #include "utils.h"
-#include "color.h"
 
 struct Chunk {
   uint32_t Height;
@@ -81,9 +79,9 @@ void writePixel(Color color, uint8_t* pixelPtr, int samplesPerPixel) {
   double b = color.z();
 
   double scale = 1.0 / samplesPerPixel;
-  r *= scale;
-  g *= scale;
-  b *= scale;
+  r = std::sqrt(scale * r);
+  g = std::sqrt(scale * g);
+  b = std::sqrt(scale * b);
 
   *pixelPtr       = static_cast<uint8_t>(256 * clamp(r, 0.0, 0.999));
   *(pixelPtr + 1) = static_cast<uint8_t>(256 * clamp(g, 0.0, 0.999));
@@ -91,13 +89,19 @@ void writePixel(Color color, uint8_t* pixelPtr, int samplesPerPixel) {
 }
 
 
-Color rayColor(const Ray& r, const Hittable& world) {
+Color rayColor(const Ray& r, const Hittable& world, int depth) {
   HitRecord rec;
-  if (world.hit(r, 0, c_INFINITY, rec)) {
-    return 0.5 * (rec.normal + Color(1, 1, 1));
+
+  if (depth <= 0) {
+    return {0, 0, 0};
   }
-  vec3 unit_direction = unit_vector(r.direction());
-  auto t              = 0.5 * (unit_direction.y() + 1.0);
+
+  if (world.hit(r, 0, c_INFINITY, rec)) {
+    point3 target = rec.p + rec.normal + random_in_unit_sphere();
+    return 0.5 * rayColor(Ray(rec.p, target - rec.p), world, depth - 1);
+  }
+  vec3      unit_direction = unit_vector(r.direction());
+  auto      t              = 0.5 * (unit_direction.y() + 1.0);
   return (1.0 - t) * Color(0.0, 0.0, 0.0) + t * Color(0.5, 0.7, 1.0);
 }
 
@@ -110,21 +114,6 @@ void renderChunk(const Camera& camera, const Hittable& hittable, int samplesPerP
   ss.str(std::string());
 
   uint8_t* bufferPtr{&chunk.buffer[0]};
-//  for (uint32_t chunkY{0}; chunkY < chunk.Height; chunkY++) {
-//    uint32_t      absoluteY{chunk.FullImageHeight - (chunkY + chunk.YOffset)};
-//    for (uint32_t chunkX{0}; chunkX < chunk.Width; chunkX++) {
-//      uint32_t absoluteX{chunkX + chunk.XOffset};
-//      Color    pixel{0.0, 0.0, 0.0};
-//      for (int s{0}; s < samplesPerPixel; s++) {
-//        double u = (double(absoluteX) + randomDouble()) / (chunk.FullImageWidth - 1);
-//        double v = (double(absoluteY) + randomDouble()) / (chunk.FullImageHeight - 1);
-//        Ray    r = camera.genRay(u, v);
-//        pixel += rayColor(r, hittable);
-//      }
-//      writePixel(pixel, bufferPtr, samplesPerPixel);
-//      bufferPtr += 3;
-//    }
-//  }
 
   for (uint32_t y{0}; y < chunk.Height; y++) {
     uint32_t      absY{chunk.FullImageHeight - (chunk.YOffset + y)};
@@ -141,7 +130,7 @@ void renderChunk(const Camera& camera, const Hittable& hittable, int samplesPerP
         auto u = (double(absX) + randomDouble()) / (chunk.FullImageWidth - 1);
         auto v = (double(absY) + randomDouble()) / (chunk.FullImageHeight - 1);
         Ray  r = camera.genRay(u, v);
-        pixel += rayColor(r, hittable);
+        pixel += rayColor(r, hittable, 5);
       }
       writePixel(pixel, bufferPtr, samplesPerPixel);
       bufferPtr += 3;
@@ -192,29 +181,6 @@ void write_color(std::ostream& out, Color pixel_color, int samples_per_pixel) {
   out << static_cast<int>(256 * clamp(r, 0.0, 0.999)) << ' '
       << static_cast<int>(256 * clamp(g, 0.0, 0.999)) << ' '
       << static_cast<int>(256 * clamp(b, 0.0, 0.999)) << '\n';
-}
-
-void write_image(const Camera& camera, const Hittable& hittable, int width, int height, int samplesPerPixel, const std::string& fileName) {
-  std::ofstream file(fileName);
-  file << "P3\n" << width << " " << height << "\n255\n";
-
-  std::cerr << "Starting the rendering process...\n" << "\tFile name: " << fileName << "\tWidth: " << width << "\n\tHeight: " << height << "\n";
-
-  for (int j = height - 1; j >= 0; --j) {
-    std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-    for (int i = 0; i < width; ++i) {
-      Color    pixelColor{0.0, 0.0, 0.0};
-      for (int s{0}; s < samplesPerPixel; s++) {
-        auto u = (double(i) + randomDouble()) / (width - 1);
-        auto v = (double(j) + randomDouble()) / (height - 1);
-        Ray  r = camera.genRay(u, v);
-        pixelColor += rayColor(r, hittable);
-      }
-      write_color(file, pixelColor, samplesPerPixel);
-    }
-  }
-
-  std::cerr << "\nDone\n";
 }
 
 void writeChunkBuffers(uint32_t horizontalChunkCount, uint32_t verticalChunkCount, Chunk* chunks, std::ofstream& file) {

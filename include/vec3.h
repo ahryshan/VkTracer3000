@@ -8,8 +8,18 @@
 #include <cmath>
 #include <ostream>
 
+#include "utils.h"
+
 class vec3 {
 public:
+  inline static vec3 random() {
+    return vec3(randomDouble(), randomDouble(), randomDouble());
+  }
+
+  inline static vec3 random(double min, double max) {
+    return vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max));
+  }
+
   vec3() : e{0, 0, 0} {}
   vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
 
@@ -98,6 +108,14 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 unit_vector(vec3 v) {
   return v / v.length();
+}
+
+inline vec3 random_in_unit_sphere() {
+  while(true) {
+    auto p = vec3::random();
+    if (p.length_squared() >= 1) continue;
+    return p;
+  }
 }
 
 #endif //VKTRACER3000_VEC3_H

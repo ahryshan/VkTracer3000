@@ -126,4 +126,24 @@ inline vec3 random_in_hemisphere(const vec3& normal) {
     return -inUnitSphere;
 }
 
+inline bool nearZeroVector(vec3 vector) {
+  const auto threshold = 1e-8;
+  for (int   i{0}; i < 3; i++) {
+    if (std::fabs(vector[i]) > threshold)
+      return false;
+  }
+  return true;
+}
+
+inline vec3 reflect(const vec3& v, const vec3& normal) {
+  return v - 2 * dot(v, normal) * normal;
+}
+
+inline vec3 refract(const vec3& uv, const vec3& normal, float refractionRatio) {
+  float cosTheta         = std::fmin(dot(-uv, normal), 1.f);
+  vec3  outPerpendicular = refractionRatio * (uv + cosTheta * normal);
+  vec3  outParallel      = -std::sqrt(std::fabs(1.f - outPerpendicular.length_squared())) * normal;
+  return outParallel + outPerpendicular;
+}
+
 #endif //VKTRACER3000_VEC3_H

@@ -12,6 +12,9 @@
 #include <functional>
 
 #include "utils.h"
+#include "Material.h"
+
+constexpr int rayDepth{10};
 
 struct Chunk {
   uint32_t Height;
@@ -97,8 +100,11 @@ Color rayColor(const Ray& r, const Hittable& world, int depth) {
   }
 
   if (world.hit(r, 0.001, c_INFINITY, rec)) {
-    point3 target = rec.p + rec.normal + random_in_hemisphere(rec.normal);
-    return 0.5 * rayColor(Ray(rec.p, target - rec.p), world, depth - 1);
+    Ray   scattered;
+    Color attenuation;
+    if (rec.material->scatter(r, rec, attenuation, scattered))
+      return attenuation * rayColor(scattered, world, depth - 1);
+    return {0.0, 0.0, 0.0};
   }
   vec3      unit_direction = unit_vector(r.direction());
   auto      t              = 0.5 * (unit_direction.y() + 1.0);
@@ -120,17 +126,11 @@ void renderChunk(const Camera& camera, const Hittable& hittable, int samplesPerP
     for (uint32_t x{0}; x < chunk.Width; x++) {
       uint32_t absX{chunk.XOffset + x};
       Color    pixel{0.0, 0.0, 0.0};
-//      if (x % (chunk.Width - 1) == 0 || y % (chunk.Height - 1) == 0) {
-//        pixel = {1.0, 0.0, 0.0};
-//        writePixel(pixel, bufferPtr, 1);
-//        bufferPtr += 3;
-//        continue;
-//      }
       for (int s{0}; s < samplesPerPixel; s++) {
         auto u = (double(absX) + randomDouble()) / (chunk.FullImageWidth - 1);
         auto v = (double(absY) + randomDouble()) / (chunk.FullImageHeight - 1);
         Ray  r = camera.genRay(u, v);
-        pixel += rayColor(r, hittable, 5);
+        pixel += rayColor(r, hittable, rayDepth);
       }
       writePixel(pixel, bufferPtr, samplesPerPixel);
       bufferPtr += 3;

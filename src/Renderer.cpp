@@ -14,7 +14,7 @@
 #include "utils.h"
 #include "Material.h"
 
-constexpr int rayDepth{10};
+constexpr int rayDepth{25};
 
 struct Chunk {
   uint32_t Height;
